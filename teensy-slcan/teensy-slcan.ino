@@ -19,9 +19,7 @@ static uint8_t hexval[17] = "0123456789ABCDEF";
 //----------------------------------------------------------------
 
 void send_canmsg(char *buf, boolean rtr) {
-  if (!slcan) {
-    delay(0);
-  } else {
+  if (slcan) {
     CAN_message_t outMsg;
     int msg_id = 0;
     sscanf(&buf[1], "%03x", &msg_id);
@@ -100,42 +98,39 @@ void pars_slcancmd(char *buf)
     case 'S':               // CAN bit-rate
       switch (buf[1]) {
         case '0': // 10k  
+          // N/A
           slcan_nack();
           break;
         case '1': // 20k
+          // N/A
           slcan_nack();
           break;
         case '2': // 50k
-          slcan_nack();
+          CANBUSSPEED = 50000;
+          slcan_ack();
           break;
         case '3': // 100k
           CANBUSSPEED = 100000;
-          //CAN_cfg.speed=CAN_SPEED_100KBPS;
           slcan_ack();
           break;
         case '4': // 125k
           CANBUSSPEED = 125000;
-          //CAN_cfg.speed=CAN_SPEED_125KBPS;
           slcan_ack();
           break;
         case '5': // 250k
           CANBUSSPEED = 250000;
-          //CAN_cfg.speed=CAN_SPEED_250KBPS;
           slcan_ack();
           break;
         case '6': // 500k
           CANBUSSPEED = 500000;
-          //CAN_cfg.speed=CAN_SPEED_500KBPS;
           slcan_ack();
           break;
         case '7': // 800k
-          CANBUSSPEED = 800000;
-          //CAN_cfg.speed=CAN_SPEED_800KBPS;
+          // N/A
           slcan_nack();
           break;
         case '8': // 1000k
           CANBUSSPEED = 1000000;
-          //CAN_cfg.speed=CAN_SPEED_1000KBPS;
           slcan_ack();
           break;
         default:
@@ -174,14 +169,14 @@ void pars_slcancmd(char *buf)
       if (timestamp) Serial.print(F("  ON"));
       Serial.println();
       Serial.println(F("snn\t=\tSpeed 0xnnk N/A"));
-      Serial.println(F("S0\t=\tSpeed 10k N/A"));
-      Serial.println(F("S1\t=\tSpeed 20k N/A"));
-      Serial.println(F("S2\t=\tSpeed 50k N/A"));
+      Serial.println(F("S0\t=\tSpeed 10k    N/A"));
+      Serial.println(F("S1\t=\tSpeed 20k    N/A"));
+      Serial.println(F("S2\t=\tSpeed 50k"));
       Serial.println(F("S3\t=\tSpeed 100k"));
       Serial.println(F("S4\t=\tSpeed 125k"));
       Serial.println(F("S5\t=\tSpeed 250k"));
       Serial.println(F("S6\t=\tSpeed 500k"));
-      Serial.println(F("S7\t=\tSpeed 800k N/A"));
+      Serial.println(F("S7\t=\tSpeed 800k   N/A"));
       Serial.println(F("S8\t=\tSpeed 1000k"));
       Serial.println(F("F\t=\tFlags N/A"));
       Serial.println(F("N\t=\tSerial No"));
@@ -196,6 +191,9 @@ void pars_slcancmd(char *buf)
       }
       Serial.print(F("CAN_SPEED:\t"));
       switch(CANBUSSPEED/1000) {
+        case 50:
+          Serial.print(F("50"));
+          break;
         case 100:
           Serial.print(F("100"));
           break;
@@ -207,9 +205,6 @@ void pars_slcancmd(char *buf)
           break;
         case 500:
           Serial.print(F("500"));
-          break;
-        case 800:
-          Serial.print(F("800"));
           break;
         case 1000:
           Serial.print(F("1000"));
@@ -273,7 +268,7 @@ void xfer_tty2can()
       }
     }
   }
-}
+} //xfer_tty2can()
 
 // -------------------------------------------------------------
 
@@ -317,16 +312,16 @@ void xfer_can2tty()
         command = command + char(hexval[ inMsg.buf[i]&15 ]);
         //printf("%c\t", (char)rx_frame.data.u8[i]);
       }
-    if (timestamp) {
-      time_now = millis() % 60000;
-      command = command + char(hexval[ (time_now>>12)&15 ]);
-      command = command + char(hexval[ (time_now>>8)&15 ]);
-      command = command + char(hexval[ (time_now>>4)&15 ]);
-      command = command + char(hexval[ time_now&15 ]);
-    }
-    command = command + '\r';
-    Serial.print(command);
-    if (cr) Serial.println("");
+      if (timestamp) {
+        time_now = millis() % 60000;
+        command = command + char(hexval[ (time_now>>12)&15 ]);
+        command = command + char(hexval[ (time_now>>8)&15 ]);
+        command = command + char(hexval[ (time_now>>4)&15 ]);
+        command = command + char(hexval[ time_now&15 ]);
+      }
+      command = command + '\r';
+      Serial.print(command);
+      if (cr) Serial.println("");
     }
   }
 }
