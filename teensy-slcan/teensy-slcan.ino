@@ -12,7 +12,7 @@ boolean slcan     = true;
 boolean cr        = false;
 boolean timestamp = false;
 
-int CANBUSSPEED = 125000;
+int CANBUSSPEED = 500000;
 
 static uint8_t hexval[17] = "0123456789ABCDEF";
 
@@ -168,7 +168,7 @@ void pars_slcancmd(char *buf)
       Serial.print(F("Z1\t=\tTimestamp On"));
       if (timestamp) Serial.print(F("  ON"));
       Serial.println();
-      Serial.println(F("snn\t=\tSpeed 0xnnk N/A"));
+      Serial.println(F("snn\t=\tSpeed 0xnnk  N/A"));
       Serial.println(F("S0\t=\tSpeed 10k    N/A"));
       Serial.println(F("S1\t=\tSpeed 20k    N/A"));
       Serial.println(F("S2\t=\tSpeed 50k"));
@@ -178,7 +178,7 @@ void pars_slcancmd(char *buf)
       Serial.println(F("S6\t=\tSpeed 500k"));
       Serial.println(F("S7\t=\tSpeed 800k   N/A"));
       Serial.println(F("S8\t=\tSpeed 1000k"));
-      Serial.println(F("F\t=\tFlags N/A"));
+      Serial.println(F("F\t=\tFlags        N/A"));
       Serial.println(F("N\t=\tSerial No"));
       Serial.println(F("V\t=\tVersion"));
       Serial.println(F("-----NOT SPEC-----"));
@@ -333,12 +333,12 @@ void setup(void)
   delay(1000);
 
   Serial.begin(2000000);
+  if (CANBUSSPEED == 500000) Serial.println (F("STANDARD OBD2 SPEED"));
   Serial.println(F("teensy-slcan"));
   Serial.print(F("SPEED     "));
   Serial.print(CANBUSSPEED);
   Serial.println(F("bps"));
-  if (CANBUSSPEED == 500000) Serial.println (F("STANDARD OBD2 SPEED"));
-
+  
   Can0.begin(CANBUSSPEED);  
 
   //if using enable pins on a transceiver they need to be set on
